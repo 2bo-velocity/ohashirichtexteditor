@@ -35,6 +35,8 @@ final class Editor extends Component
         // Optional: a Livewire editor (wire:model) is not submitted with a form.
         public string $name = '',
         public ?string $value = null,
+        // Reserved for HTML lint (v1.1). Accepted so `:html-lint` does not
+        // fall through to the element as an attribute; not rendered yet.
         public bool $htmlLint = true,
         string|bool|null $uploadUrl = null,
         ?string $locale = null,
@@ -47,7 +49,12 @@ final class Editor extends Component
         $this->resolvedUploadUrl = match (true) {
             is_string($uploadUrl) && $uploadUrl !== '' => $uploadUrl,
             $uploadUrl === false || $uploadUrl === '' => null,
-            $enabled && Route::has('ohashi-editor.images.store') => route('ohashi-editor.images.store'),
+            // A path, not route()'s absolute URL: that one is built from
+            // APP_URL, which often differs from the address in the browser
+            // (Laravel's default http://localhost vs `php artisan serve` on
+            // 127.0.0.1:8000). Another origin gets no session cookie and no
+            // CSRF token from the editor, so every upload failed.
+            $enabled && Route::has('ohashi-editor.images.store') => route('ohashi-editor.images.store', [], false),
             default => null,
         };
         // Lets the editor refuse a file that is too large before sending it.

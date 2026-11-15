@@ -1,6 +1,6 @@
 {
   "name": "@2bo-velocity/ohashirichtexteditor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Encapsulated, dependency-free rich text editor built with Web Components and Shadow DOM.",
   "license": "AGPL-3.0-or-later",

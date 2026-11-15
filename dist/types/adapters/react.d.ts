@@ -3,8 +3,13 @@ export interface OhashiEditorProps {
     value: string;
     onChange: (html: string) => void;
     name?: string;
+    /** Reserved for HTML lint (v1.1); has no effect yet. */
     htmlLint?: boolean;
-    /** Where images are uploaded, e.g. route('ohashi-editor.images.store'). Without it there is no image button. */
+    /**
+     * Where images are uploaded. Give a path on the page's own origin — with
+     * Ziggy, route('ohashi-editor.images.store', undefined, false) — so the
+     * session cookie and CSRF token are sent. Without it there is no image button.
+     */
     uploadUrl?: string;
     /** The largest file (bytes) the endpoint accepts; larger files are refused before sending. */
     uploadMaxSize?: number;
@@ -20,10 +25,9 @@ export interface OhashiEditorProps {
  * The value is pushed through the DOM property and the change event is bound by
  * hand: React's synthetic onChange does not see a custom element's CustomEvent.
  */
-export declare function OhashiEditor({ value, onChange, name, htmlLint, uploadUrl, uploadMaxSize, toolbar, locale, label, onError }: OhashiEditorProps): import("react").ReactElement<{
+export declare function OhashiEditor({ value, onChange, name, uploadUrl, uploadMaxSize, toolbar, locale, label, onError }: OhashiEditorProps): import("react").ReactElement<{
     ref: import("react").RefObject<OhashiEditorElement | null>;
     name: string | undefined;
-    'html-lint': string;
     'upload-url': string | undefined;
     'upload-max-size': string | undefined;
     toolbar: string | undefined;

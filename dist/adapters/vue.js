@@ -22,7 +22,6 @@ var i = e({
 		return () => t(n, {
 			".value": e.modelValue,
 			name: e.name,
-			"html-lint": String(e.htmlLint),
 			onChange: (e) => {
 				r(e) && i("update:modelValue", e.detail.html);
 			}

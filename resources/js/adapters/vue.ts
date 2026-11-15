@@ -20,6 +20,7 @@ export const OhashiEditor = defineComponent({
   props: {
     modelValue: { type: String, default: '' },
     name: { type: String, default: undefined },
+    // Reserved for HTML lint (v1.1); has no effect yet.
     htmlLint: { type: Boolean as PropType<boolean>, default: true },
   },
   emits: ['update:modelValue'],
@@ -30,7 +31,6 @@ export const OhashiEditor = defineComponent({
         // element's no-op-on-same-value setter is what absorbs v-model's echo.
         '.value': props.modelValue,
         name: props.name,
-        'html-lint': String(props.htmlLint),
         onChange: (event: Event) => {
           if (isOhashiEditorChange(event)) emit('update:modelValue', event.detail.html);
         },

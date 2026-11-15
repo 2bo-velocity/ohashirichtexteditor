@@ -1,30 +1,29 @@
 import { TAG_NAME as e, isOhashiEditorChange as t } from "@2bo-velocity/ohashirichtexteditor";
 import { createElement as n, useEffect as r, useRef as i } from "react";
 // resources/js/adapters/react.ts
-function a({ value: a, onChange: o, name: s, htmlLint: c = !0, uploadUrl: l, uploadMaxSize: u, toolbar: d, locale: f, label: p, onError: m }) {
-	let h = i(null), g = i(o);
-	g.current = o;
-	let _ = i(m);
-	return _.current = m, r(() => {
-		h.current && (h.current.value = a);
+function a({ value: a, onChange: o, name: s, uploadUrl: c, uploadMaxSize: l, toolbar: u, locale: d, label: f, onError: p }) {
+	let m = i(null), h = i(o);
+	h.current = o;
+	let g = i(p);
+	return g.current = p, r(() => {
+		m.current && (m.current.value = a);
 	}, [a]), r(() => {
-		let e = h.current;
+		let e = m.current;
 		if (!e) return;
 		let n = (e) => {
-			t(e) && g.current(e.detail.html);
-		}, r = (e) => _.current?.(e);
+			t(e) && h.current(e.detail.html);
+		}, r = (e) => g.current?.(e);
 		return e.addEventListener("change", n), e.addEventListener("ohashi-error", r), () => {
 			e.removeEventListener("change", n), e.removeEventListener("ohashi-error", r);
 		};
 	}, []), n(e, {
-		ref: h,
+		ref: m,
 		name: s,
-		"html-lint": String(c),
-		"upload-url": l,
-		"upload-max-size": u === void 0 ? void 0 : String(u),
-		toolbar: d,
-		locale: f,
-		label: p
+		"upload-url": c,
+		"upload-max-size": l === void 0 ? void 0 : String(l),
+		toolbar: u,
+		locale: d,
+		label: f
 	});
 }
 export { a as OhashiEditor, a as default };

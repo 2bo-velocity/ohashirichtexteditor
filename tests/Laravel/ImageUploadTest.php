@@ -6,6 +6,7 @@ use Illuminate\Auth\GenericUser;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 use function OhashiEditor\Tests\Image\encode;
 use function OhashiEditor\Tests\Image\pngHeaderOnly;
@@ -124,8 +125,22 @@ it('does not leak storage errors to the client', function (): void {
 it('points the Blade component at the upload route and tells it the limit', function (): void {
     $html = Blade::render('<x-ohashi-editor name="body" />');
 
-    expect($html)->toContain('upload-url="http://localhost/ohashi-editor/images"')
+    expect($html)->toContain('upload-url="/ohashi-editor/images"')
         ->toMatch('/upload-max-size="\d+"/');
+});
+
+// Reported in v0.1.0: the URL was built from APP_URL. Laravel's default is
+// http://localhost while `php artisan serve` opens http://127.0.0.1:8000, so
+// the endpoint was another origin, where the editor sends neither the session
+// cookie nor the CSRF token — every upload failed. A path is the page's own
+// origin whatever APP_URL says.
+it('gives the upload route as a path, so it is the page\'s own origin whatever APP_URL is', function (): void {
+    config(['app.url' => 'http://localhost']);
+    URL::forceRootUrl('http://localhost');
+
+    expect(Blade::render('<x-ohashi-editor name="body" />'))
+        ->toContain('upload-url="/ohashi-editor/images"')
+        ->not->toContain('upload-url="http');
 });
 
 it('lets one editor use its own endpoint or none', function (): void {

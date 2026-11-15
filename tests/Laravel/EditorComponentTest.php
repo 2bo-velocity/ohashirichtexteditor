@@ -21,7 +21,8 @@ it('renders the custom element with name and value', function (): void {
     expect($html)
         ->toContain('<ohashi-rich-text-editor')
         ->toContain('name="body"')
-        ->toContain('html-lint="true"');
+        // HTML lint is a v1.1 feature: its attribute is not part of v0.x/1.0.
+        ->not->toContain('html-lint');
 });
 
 it('takes the UI language from config, else from the app locale when the editor ships it', function (?string $configured, string $app, ?string $expected): void {
@@ -71,10 +72,10 @@ it('escapes the initial value inside the attribute', function (): void {
     expect($html)->not->toContain('" onmouseover="alert(1)');
 });
 
-it('can turn the html lint off', function (): void {
+it('still accepts html-lint (reserved for v1.1) without rendering it', function (): void {
     $html = Blade::render('<x-ohashi-editor name="body" :html-lint="false" />');
 
-    expect($html)->toContain('html-lint="false"');
+    expect($html)->not->toContain('html-lint');
 });
 
 it('accepts the value types a model attribute can hold', function (mixed $value, string $expected): void {
