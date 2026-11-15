@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Paste capture</title>
+<style>
+  body { font: 14px/1.5 system-ui, sans-serif; margin: 2rem; max-width: 60rem; }
+  pre { background: #f3f4f6; padding: 1rem; max-height: 20rem; overflow: auto; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+  label { display: block; margin: 1rem 0 .25rem; font-weight: 600; }
+  input[type=text] { width: 100%; padding: .25rem .5rem; }
+  textarea { width: 100%; height: 10rem; font: 12px monospace; }
+</style>
+<h1>Paste capture</h1>
+<p>
+  1. Say where the content comes from (e.g. "Word 365 Windows, heading + bold + list + table").<br>
+  2. Copy something in that application, click into the editor below and paste (Ctrl/Cmd+V).<br>
+  3. Check the result below, then press <b>Copy fixture</b> and paste it into the chat.
+  <b>Start over</b> empties the editor for the next capture.
+</p>
+<label for="source">Source</label>
+<input id="source" type="text" placeholder="Word 365 (Windows) / Google Docs (Chrome) / …">
+<label>Paste into the editor</label>
+<ohashi-rich-text-editor id="editor" label="Paste here"></ohashi-rich-text-editor>
+<p><button id="copy" disabled>Copy fixture</button> <button id="save" disabled>Save as file</button> <button id="reset">Start over</button> <span id="status"></span></p>
+<textarea id="out" hidden readonly></textarea>
+<label>Clipboard types</label>
+<pre id="types"></pre>
+<label>What the editor makes of it (value)</label>
+<pre id="result"></pre>
+<label>Raw text/html</label>
+<pre id="html"></pre>
+<script type="module" src="paste-capture.js"></script>

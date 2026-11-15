@@ -1,0 +1,176 @@
+{
+  "$comment": [
+    "Sanitiser cases run against both sides: tests/js (happy-dom), tests/browser",
+    "(Chromium, Firefox, WebKit via Playwright) and tests/Sanitizer (PHP). 'expected' is written as a browser serialises it;",
+    "the PHP test compares structure, not bytes (Symfony writes <br /> and &#34;).",
+    "'skipIn' names environments whose parser is known to differ from browsers, with the reason (keys: happy-dom, chrome, php).",
+    "'normalized' (when present) is what the editor's value holds after it also normalises: sanitising is the same on both sides, normalising is the editor's own tidying (inline runs wrapped in <p>, <b> to <strong>, …). Omitted when equal to 'expected'."
+  ],
+  "cases": [
+    {
+      "name": "formatting is kept",
+      "input": "<h2>T</h2><h3>t</h3><p><strong>b</strong> <em>i</em> <s>s</s> <u>u</u> <code>c</code></p>",
+      "expected": "<h2>T</h2><h3>t</h3><p><strong>b</strong> <em>i</em> <s>s</s> <u>u</u> <code>c</code></p>"
+    },
+    {
+      "name": "lists and quotes",
+      "input": "<blockquote><p>q</p></blockquote><ul><li>u</li></ul><ol><li>o</li></ol>",
+      "expected": "<blockquote><p>q</p></blockquote><ul><li>u</li></ul><ol><li>o</li></ol>"
+    },
+    {
+      "name": "code block",
+      "input": "<pre><code>if (a &lt; b) {}</code></pre>",
+      "expected": "<pre><code>if (a &lt; b) {}</code></pre>"
+    },
+    {
+      "name": "table with spans",
+      "input": "<table><thead><tr><th colspan=\"2\">h</th></tr></thead><tbody><tr><td rowspan=\"2\">a</td><td>b</td></tr></tbody></table>",
+      "expected": "<table><thead><tr><th colspan=\"2\">h</th></tr></thead><tbody><tr><td rowspan=\"2\">a</td><td>b</td></tr></tbody></table>"
+    },
+    {
+      "name": "oversized colspan is dropped",
+      "input": "<table><tbody><tr><td colspan=\"9999\">a</td></tr></tbody></table>",
+      "expected": "<table><tbody><tr><td>a</td></tr></tbody></table>"
+    },
+    {
+      "name": "japanese text and entities",
+      "input": "<p>日本語の本文 &amp; &lt;tag&gt; &nbsp;です</p>",
+      "expected": "<p>日本語の本文 &amp; &lt;tag&gt; &nbsp;です</p>"
+    },
+    {
+      "name": "span and font are unwrapped",
+      "input": "<p><span style=\"color:red\">red</span> <font color=\"blue\">blue</font></p>",
+      "expected": "<p>red blue</p>"
+    },
+    {
+      "name": "div and section are unwrapped",
+      "input": "<section><div><p>a</p></div></section>",
+      "expected": "<p>a</p>"
+    },
+    {
+      "name": "custom elements are dropped with content",
+      "input": "<p>a<x-widget>secret</x-widget></p>",
+      "expected": "<p>a</p>"
+    },
+    {
+      "name": "script and style are dropped",
+      "input": "<p>a</p><script>window.pwned = 1</script><style>*{}</style>",
+      "expected": "<p>a</p>"
+    },
+    {
+      "name": "event handlers are removed",
+      "input": "<p onclick=\"x()\">a</p><img src=\"/a.png\" onerror=\"x()\" alt=\"A\">",
+      "expected": "<p>a</p><img src=\"/a.png\" alt=\"A\">",
+      "normalized": "<p>a</p><p><img src=\"/a.png\" alt=\"A\"></p>"
+    },
+    {
+      "name": "style and class attributes are removed",
+      "input": "<p style=\"color:red\" class=\"x\" id=\"y\">a</p>",
+      "expected": "<p>a</p>"
+    },
+    {
+      "name": "javascript URLs are removed",
+      "input": "<a href=\"javascript:alert(1)\">a</a><a href=\"java&#x09;script:alert(1)\">b</a>",
+      "expected": "<a rel=\"noopener noreferrer\">a</a><a rel=\"noopener noreferrer\">b</a>",
+      "normalized": "<p><a rel=\"noopener noreferrer\">a</a><a rel=\"noopener noreferrer\">b</a></p>"
+    },
+    {
+      "name": "safe link schemes are kept",
+      "input": "<a href=\"https://example.com/x?a=1&amp;b=2\">h</a><a href=\"mailto:a@example.com\">m</a><a href=\"/rel\">r</a>",
+      "expected": "<a href=\"https://example.com/x?a=1&amp;b=2\" rel=\"noopener noreferrer\">h</a><a href=\"mailto:a@example.com\" rel=\"noopener noreferrer\">m</a><a href=\"/rel\" rel=\"noopener noreferrer\">r</a>",
+      "normalized": "<p><a href=\"https://example.com/x?a=1&amp;b=2\" rel=\"noopener noreferrer\">h</a><a href=\"mailto:a@example.com\" rel=\"noopener noreferrer\">m</a><a href=\"/rel\" rel=\"noopener noreferrer\">r</a></p>"
+    },
+    {
+      "name": "target only _blank",
+      "input": "<a href=\"/a\" target=\"_blank\">a</a><a href=\"/b\" target=\"_top\">b</a>",
+      "expected": "<a href=\"/a\" target=\"_blank\" rel=\"noopener noreferrer\">a</a><a href=\"/b\" rel=\"noopener noreferrer\">b</a>",
+      "normalized": "<p><a href=\"/a\" target=\"_blank\" rel=\"noopener noreferrer\">a</a><a href=\"/b\" rel=\"noopener noreferrer\">b</a></p>"
+    },
+    {
+      "name": "raster data images are kept",
+      "input": "<img src=\"data:image/png;base64,iVBORw0KGgo=\" alt=\"p\">",
+      "expected": "<img src=\"data:image/png;base64,iVBORw0KGgo=\" alt=\"p\">",
+      "normalized": "<p><img src=\"data:image/png;base64,iVBORw0KGgo=\" alt=\"p\"></p>"
+    },
+    {
+      "name": "svg data images are removed",
+      "input": "<img src=\"data:image/svg+xml;base64,PHN2Zz4=\" alt=\"s\">",
+      "expected": "<img alt=\"s\">",
+      "normalized": "<p><img alt=\"s\"></p>"
+    },
+    {
+      "name": "html data URLs are removed",
+      "input": "<img src=\"data:text/html,x\" alt=\"h\">",
+      "expected": "<img alt=\"h\">",
+      "normalized": "<p><img alt=\"h\"></p>"
+    },
+    {
+      "name": "image width presets",
+      "input": "<img src=\"/a.png\" width=\"50%\"><img src=\"/b.png\" width=\"320\"><img src=\"/c.png\" width=\"calc(100%)\">",
+      "expected": "<img src=\"/a.png\" width=\"50%\"><img src=\"/b.png\" width=\"320\"><img src=\"/c.png\">",
+      "normalized": "<p><img src=\"/a.png\" width=\"50%\"><img src=\"/b.png\" width=\"320\"><img src=\"/c.png\"></p>"
+    },
+    {
+      "name": "embedding elements are dropped",
+      "input": "<iframe src=\"https://evil.example\">x</iframe><object data=\"x\"></object><embed src=\"x\"><p>kept</p>",
+      "expected": "<p>kept</p>"
+    },
+    {
+      "name": "svg with script is dropped, content after it kept",
+      "input": "<svg><script>window.pwned = 2</script></svg><p>after</p>",
+      "expected": "<p>after</p>",
+      "skipIn": {
+        "happy-dom": "happy-dom's parser swallows everything after <svg>, unlike browsers"
+      }
+    },
+    {
+      "name": "forms are dropped",
+      "input": "<form action=\"https://evil.example\"><input name=\"p\"><button>Go</button></form><p>k</p>",
+      "expected": "<p>k</p>"
+    },
+    {
+      "name": "comments are removed",
+      "input": "<p>a<!-- secret --></p>",
+      "expected": "<p>a</p>"
+    },
+    {
+      "name": "noscript mXSS",
+      "input": "<noscript><p title=\"</noscript><img src=x onerror=window.pwned=7>\"></p></noscript>",
+      "expected": ""
+    },
+    {
+      "name": "details ontoggle",
+      "input": "<details open ontoggle=\"window.pwned = 8\"><summary>s</summary>d</details>",
+      "expected": "sd",
+      "normalized": "<p>sd</p>"
+    },
+    {
+      "name": "block inside a paragraph (HTML5 parsing)",
+      "input": "<p>a<div>b</div>c</p>",
+      "expected": "<p>a</p>bc<p></p>",
+      "skipIn": {
+        "happy-dom": "happy-dom does not close <p> at a block element"
+      },
+      "normalized": "<p>a</p><p>bc</p>"
+    },
+    {
+      "name": "misnested formatting (HTML5 adoption agency)",
+      "input": "<p><b>1<i>2</b>3</i></p>",
+      "expected": "<p><b>1<i>2</i></b><i>3</i></p>",
+      "skipIn": {
+        "happy-dom": "happy-dom does not run the adoption agency algorithm"
+      },
+      "normalized": "<p><strong>1<em>2</em></strong><em>3</em></p>"
+    },
+    {
+      "name": "leading head-only elements are parsed in body context",
+      "input": "<meta http-equiv=\"refresh\" content=\"0;url=https://evil.example\"><style>p{}</style><p>a</p>",
+      "expected": "<p>a</p>"
+    },
+    {
+      "name": "noscript breakout in Firefox's template parsing",
+      "input": "<p>x</p><noscript><p title=\"</noscript><img src=x onerror=window.pwned=9>\"></p></noscript>",
+      "expected": "<p>x</p>"
+    }
+  ]
+}

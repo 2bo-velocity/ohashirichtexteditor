@@ -1,0 +1,21 @@
+# A small Laravel app for the Livewire browser tests (tests/livewire/):
+#   vendor/bin/testbench serve --port 8123
+# test/livewire.sh runs it in Docker and points Playwright at it.
+laravel: '@testbench'
+
+env:
+  APP_KEY: base64:a2tra2tra2tra2tra2tra2tra2tra2tra2tra2tra2s=
+  APP_DEBUG: true
+  SESSION_DRIVER: file
+  CACHE_STORE: array
+
+providers:
+  - Livewire\LivewireServiceProvider
+  - OhashiEditor\Laravel\OhashiEditorServiceProvider
+  - Workbench\App\Providers\WorkbenchServiceProvider
+
+workbench:
+  start: /livewire/deferred
+  discovers:
+    web: true
+    views: true

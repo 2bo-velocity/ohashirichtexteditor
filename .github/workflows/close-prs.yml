@@ -1,0 +1,26 @@
+name: Close pull requests
+
+# This project does not accept code contributions (see CONTRIBUTING.md): the
+# dual license requires that one person hold the copyright to all of it. Pull
+# requests are closed with an explanation instead of being left to go stale.
+
+on:
+  pull_request_target:
+    types: [ opened, reopened ]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  close:
+    if: github.event.pull_request.user.login != github.repository_owner
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment and close
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.html_url }}
+          POLICY: ${{ github.server_url }}/${{ github.repository }}/blob/main/CONTRIBUTING.md
+        run: |
+          gh pr comment "$PR" --body "Thank you for taking the time. This project does not accept pull requests, so this one is being closed — please see [CONTRIBUTING.md]($POLICY) for why. Bug reports and feature requests are very welcome as issues."
+          gh pr close "$PR"

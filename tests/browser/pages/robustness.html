@@ -1,0 +1,13 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>pending</title>
+<form id="f">
+  <ohashi-rich-text-editor id="early" name="body"></ohashi-rich-text-editor>
+  <ohashi-rich-text-editor id="other" name="other"></ohashi-rich-text-editor>
+</form>
+<script>
+  // Set before the (deferred) module defines the element.
+  document.getElementById('early').value = '<p>early</p>';
+  window.pwned = false;
+</script>
+<script type="module" src="robustness.js"></script>

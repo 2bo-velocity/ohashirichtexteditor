@@ -1,0 +1,62 @@
+{
+  "name": "@2bo-velocity/ohashirichtexteditor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Encapsulated, dependency-free rich text editor built with Web Components and Shadow DOM.",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "files": [
+    "dist",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/ohashi-editor.js"
+    },
+    "./vue": {
+      "types": "./dist/types/adapters/vue.d.ts",
+      "import": "./dist/adapters/vue.js"
+    },
+    "./react": {
+      "types": "./dist/types/adapters/react.d.ts",
+      "import": "./dist/adapters/react.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:browser": "npm run build && playwright test",
+    "test:livewire": "playwright test -c playwright.livewire.config.ts",
+    "ime-log": "npm run build && echo \"Open http://127.0.0.1:4173/ime-log.html\" && node tests/browser/serve.mjs",
+    "paste-capture": "npm run build && echo \"Open http://127.0.0.1:4173/paste-capture.html\" && node tests/browser/serve.mjs",
+    "standalone": "npm run build && node tests/browser/standalone.mjs"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "vue": "^3.3"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "happy-dom": "^21.0.4",
+    "lucide": "1.72.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0",
+    "vue": "^3.5.45"
+  }
+}

@@ -1,0 +1,123 @@
+name: CI
+
+# The public repository's own checks.
+#
+# This file is copied out of the development repository at every release; edit
+# it there, never here — the next sync would overwrite it. The point is
+# visibility: this repository does not accept pull requests, so a green run is
+# the evidence a reader has that the code they depend on passes its tests.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }} (${{ matrix.deps }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+        deps: ['highest']
+        include:
+          - php: '8.4'
+            deps: 'lowest'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, libxml, mbstring, gd
+          coverage: none
+          tools: composer:v2
+      - run: composer update --prefer-dist --no-progress --no-interaction ${{ matrix.deps == 'lowest' && '--prefer-lowest' || '' }}
+      - run: composer validate --no-check-lock
+      - run: vendor/bin/pest
+
+  plain-php:
+    name: Plain PHP install (no Laravel)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.4'
+          extensions: dom, libxml
+          coverage: none
+          tools: composer:v2
+      - run: composer update --no-dev --prefer-dist --no-progress --no-interaction
+      - run: test ! -d vendor/laravel && test ! -d vendor/illuminate
+      - run: php -r 'require "vendor/autoload.php"; echo OhashiEditor\Version::VERSION, PHP_EOL;'
+
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  browsers:
+    name: Real browsers (Chromium, Firefox, WebKit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:browser
+
+  livewire:
+    name: Livewire ${{ matrix.livewire }} (Chromium, Firefox, WebKit)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        livewire: ['^3.8.3', '^4.0']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.4'
+          extensions: dom, libxml, mbstring, gd
+          coverage: none
+          tools: composer:v2
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install dependencies (Livewire ${{ matrix.livewire }})
+        env:
+          LIVEWIRE: ${{ matrix.livewire }}
+        run: |
+          composer require --dev --no-update "livewire/livewire:$LIVEWIRE"
+          composer update --prefer-dist --no-progress --no-interaction
+      # A small Laravel app with a Livewire component (workbench/).
+      - name: Serve the workbench app
+        run: |
+          vendor/bin/testbench serve --host=127.0.0.1 --port=8123 > serve.log 2>&1 &
+          for i in $(seq 1 60); do curl -fs http://127.0.0.1:8123/livewire/deferred > /dev/null && exit 0; sleep 1; done
+          cat serve.log; exit 1
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:livewire

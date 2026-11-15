@@ -1,0 +1,23 @@
+# Dependencies. A library ships no composer.lock: it would pin nothing for
+# consumers and mislead everyone else. package-lock.json is kept — it pins only
+# the build/test toolchain, which is ours.
+/vendor/
+/composer.lock
+/node_modules/
+
+# Caches and reports.
+/.phpunit.cache/
+/coverage/
+
+# Build output. It IS published — the package must work without Node — but it
+# is produced at release time rather than committed here, so the monorepo never
+# holds a stale bundle. scripts/release-package.sh builds it and copies it into
+# the public checkout explicitly. (This file doubles as the rsync exclude list.)
+/dist/
+
+# Single-file manual check pages (npm run standalone), copied to other machines.
+/standalone/
+
+# Playwright output.
+/test-results/
+/playwright-report/
