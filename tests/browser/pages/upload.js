@@ -44,6 +44,7 @@ window.t = {
       message: n.querySelector('[part=notice-message]')?.textContent ?? null,
       code: n.querySelector('[part=notice-code]')?.textContent ?? null,
       background: getComputedStyle(n).backgroundColor,
+      color: getComputedStyle(n).color,
     })),
   /** Notice sits between toolbar and content: [toolbar bottom, notice top, notice bottom, content top]. */
   layout: () => {

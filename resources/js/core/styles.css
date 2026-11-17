@@ -17,7 +17,8 @@
   --orte-border-color: #d1d5db;
   --orte-border-radius: 0.5rem;
   --orte-accent-color: #2563eb;
-  --orte-danger-color: #dc2626;
+  --orte-on-accent-color: #ffffff;
+  --orte-danger-color: #b91c1c;
   --orte-danger-bg: #fef2f2;
   --orte-code-bg: #1e293b;
   --orte-code-color: #f8fafc;
@@ -170,7 +171,7 @@
 .orte-btn--text[part~='btn-primary'] {
   border-color: var(--orte-accent-color);
   background: var(--orte-accent-color);
-  color: #ffffff;
+  color: var(--orte-on-accent-color);
 }
 
 .orte-toolbar:empty {

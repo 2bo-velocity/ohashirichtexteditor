@@ -16,5 +16,5 @@ namespace OhashiEditor;
  */
 final class Version
 {
-    public const string VERSION = '0.1.1';
+    public const string VERSION = '0.1.2';
 }

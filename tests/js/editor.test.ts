@@ -47,10 +47,18 @@ describe('OhashiEditorElement', () => {
     for (const name of [
       '--orte-font-family',
       '--orte-text-color',
+      '--orte-muted-color',
       '--orte-editor-bg',
       '--orte-toolbar-bg',
       '--orte-border-color',
       '--orte-border-radius',
+      '--orte-accent-color',
+      '--orte-on-accent-color',
+      '--orte-danger-color',
+      '--orte-danger-bg',
+      '--orte-code-bg',
+      '--orte-code-color',
+      '--orte-icon-size',
       '--orte-min-height',
     ]) {
       expect(css, name).toContain(`${name}:`);

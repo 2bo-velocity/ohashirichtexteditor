@@ -183,6 +183,28 @@ test.describe('links', () => {
     expect((await t(page, 'popover')).open).toBe(false);
   });
 
+  test('the Apply button takes its text colour from --orte-on-accent-color', async ({ page }) => {
+    await open(page, '<p>docs</p>');
+    await content(page).click();
+    await t(page, 'select', 'docs');
+    await page.keyboard.press('ControlOrMeta+k');
+    const apply = page.locator('#e [part~=btn-link-apply]');
+    const colours = () =>
+      apply.evaluate((el) => {
+        const s = getComputedStyle(el);
+        return [s.color, s.backgroundColor];
+      });
+    // Defaults: white on the accent (#2563eb).
+    expect(await colours()).toEqual(['rgb(255, 255, 255)', 'rgb(37, 99, 235)']);
+    // A light accent for dark mode needs dark text on it.
+    await page.evaluate(() => {
+      const e = document.getElementById('e')!;
+      e.style.setProperty('--orte-accent-color', '#38bdf8');
+      e.style.setProperty('--orte-on-accent-color', '#0f172a');
+    });
+    expect(await colours()).toEqual(['rgb(15, 23, 42)', 'rgb(56, 189, 248)']);
+  });
+
   test('unsafe URLs are refused with a message', async ({ page }) => {
     await open(page, '<p>click</p>');
     await content(page).click();

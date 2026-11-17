@@ -84,8 +84,9 @@ test('a refused upload shows a notice between toolbar and content, and fires oha
   ]);
   const [notice] = await t(page, 'notices');
   expect(notice).toMatchObject({ part: 'notice notice-error', role: 'alert', code: 'OE-UPL-4001', message: 'The image is too large. Choose an image of 5 MB or smaller.' });
-  // --orte-danger-bg (#fef2f2).
+  // --orte-danger-bg (#fef2f2) under --orte-danger-color (#b91c1c): 5.9:1.
   expect(notice.background).toBe('rgb(254, 242, 242)');
+  expect(notice.color).toBe('rgb(185, 28, 28)');
   const [toolbarBottom, noticeTop, noticeBottom, contentTop] = await t<[number, number, number, number]>(page, 'layout');
   expect(noticeTop).toBeGreaterThanOrEqual(toolbarBottom - 1);
   expect(contentTop).toBeGreaterThanOrEqual(noticeBottom - 1);
